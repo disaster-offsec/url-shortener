@@ -50,7 +50,7 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 
 		code := generateShortCode()
 
-		for storage.Exists(code) {
+		for storage.ExistCode(code) {
 			code = generateShortCode()
 		}
 
@@ -70,8 +70,9 @@ func redirectHandler(storage *Storage) http.HandlerFunc {
 			http.NotFound(w, r)
 			return
 		}
-
-		originalURL, ok := storage.Get(code)
+		
+		// амортизированное O(1)
+		originalURL, ok := storage.GetByCode(code)
 
 		if !ok {
 			http.NotFound(w, r)
