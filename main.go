@@ -47,7 +47,15 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 			http.Error(w, "URL is required", http.StatusBadRequest)
 			return
 		}
-
+		
+		if existingCode, ok := storage.GetByOriginal(req.URL); ok {
+			shortURL := "http://localhost:8080/" + existingCode
+			response := map[string]string{"short_url": shortURL}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(response)
+			return
+		} 
+		
 		code := generateShortCode()
 
 		for storage.ExistCode(code) {
