@@ -1,11 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -23,13 +23,12 @@ func main() {
 	}
 }
 
-// на первое время сгодится
+// Создаем криптографически стойкий 6-значный URL-безопасный-код
 func generateShortCode() string {
 	b := make([]byte, 4)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)[:6]
 }
-
 
 // Проверка метода необязательна
 func shortenHandler(storage *Storage) http.HandlerFunc {
@@ -47,15 +46,15 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 			http.Error(w, "URL is required", http.StatusBadRequest)
 			return
 		}
-		
+
 		if existingCode, ok := storage.GetByOriginal(req.URL); ok {
 			shortURL := "http://localhost:8080/" + existingCode
 			response := map[string]string{"short_url": shortURL}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
 			return
-		} 
-		
+		}
+
 		code := generateShortCode()
 
 		for storage.ExistCode(code) {
@@ -78,7 +77,7 @@ func redirectHandler(storage *Storage) http.HandlerFunc {
 			http.NotFound(w, r)
 			return
 		}
-		
+
 		// амортизированное O(1)
 		originalURL, ok := storage.GetByCode(code)
 

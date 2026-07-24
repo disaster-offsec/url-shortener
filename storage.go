@@ -5,9 +5,9 @@ import (
 )
 
 type Storage struct {
-	mu   sync.RWMutex
-	codeToURL map[string]string
-	urlToCode map[string]string	// 2-я хешмапы для log ассимптотики ф-ции FindByOriginal
+	mu        sync.RWMutex
+	codeToURL map[string]string // short_url -> original_url (амортизированное O(1))
+	urlToCode map[string]string // original_url -> short_url (амортизированное O(1))
 }
 
 func NewStorage() *Storage {
@@ -40,7 +40,7 @@ func (s *Storage) GetByOriginal(original string) (string, bool) {
 	return val, ok
 }
 
-// Провреяем на наличие по short_url
+// Проверяем на наличие по short_url
 func (s *Storage) ExistCode(short string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -48,7 +48,7 @@ func (s *Storage) ExistCode(short string) bool {
 	return ok
 }
 
-// Провреяем на наличие по original_url
+// Проверяем на наличие по original_url
 func (s *Storage) ExistURL(original string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
