@@ -5,5 +5,5 @@ services:
       - "8080:8080"
     environment:
       - PORT=8080
-      - BASE_URL=http://localhost
+      - BASE_URL=http://localhost:${PORT}
     restart: unless-stopped

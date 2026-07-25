@@ -17,16 +17,15 @@ import (
 func main() {
 	storage := NewStorage()
 
-	// Пока что без API
-	http.HandleFunc("POST /shorten", shortenHandler(baseURL, storage))
-	http.HandleFunc("GET /{short}", redirectHandler(storage))
-
-
+	
 	port := os.Getenv("PORT")
 	if port == "" {port = "8080"}
 
 	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {baseURL = "htpp://localhost:" + port}
+	if baseURL == "" {baseURL = "http://localhost:" + port}
+	
+	http.HandleFunc("POST /shorten", shortenHandler(baseURL, storage))
+	http.HandleFunc("GET /{short}", redirectHandler(storage))
 
 
 	// Запускаем сервер на 8080 порт
@@ -99,7 +98,7 @@ func shortenHandler(string baseURL, storage *Storage) http.HandlerFunc {
 
 		storage.Save(code, req.URL)
 
-		shortURL := baseURL + "/" + existingCode
+		shortURL := baseURL + "/" + code
 		response := map[string]string{"short_url": shortURL}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
