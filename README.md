@@ -24,7 +24,7 @@ docker compose up --build
 
 ```bash
 go mod tidy
-go run main.go storage.go
+go run ./cmd/server/main.go
 ```
 
 # API
