@@ -18,7 +18,7 @@ func main() {
 	storage := NewStorage()
 
 	// Пока что без API
-	http.HandleFunc("POST /shorten", shortenHandler(storage))
+	http.HandleFunc("POST /shorten", shortenHandler(baseURL, storage))
 	http.HandleFunc("GET /{short}", redirectHandler(storage))
 
 
@@ -26,11 +26,11 @@ func main() {
 	if port == "" {port = "8080"}
 
 	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {baseURL = "htpp://localhost" + port}
+	if baseURL == "" {baseURL = "htpp://localhost:" + port}
 
 
 	// Запускаем сервер на 8080 порт
-	log.Printf("Server starting on: %s:%s", baseURL, port)
+	log.Printf("Server starting on: %s", baseURL)
 
 	server := &http.Server{Addr: ":" + port, Handler: nil}
 
@@ -45,7 +45,7 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeOut(context.Background(), time.Second * 5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
@@ -67,7 +67,7 @@ func generateShortCode() string {
 }
 
 // Проверка метода необязательна
-func shortenHandler(storage *Storage) http.HandlerFunc {
+func shortenHandler(string baseURL, storage *Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			URL string `json:"url"`
@@ -84,7 +84,7 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 		}	
 
 		if existingCode, ok := storage.GetByOriginal(req.URL); ok {
-			shortURL := "http://localhost:8080/" + existingCode
+			shortURL := baseURL + "/" + existingCode
 			response := map[string]string{"short_url": shortURL}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
@@ -99,7 +99,7 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 
 		storage.Save(code, req.URL)
 
-		shortURL := "http://localhost:8080/" + code
+		shortURL := baseURL + "/" + existingCode
 		response := map[string]string{"short_url": shortURL}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
