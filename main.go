@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 func main() {
@@ -21,6 +22,11 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func isValidURL(raw string) bool {
+	parsed, err := url.Parse(raw)
+	return err == nil && (parsed.Scheme == "http" || parsed.Scheme == "https")
 }
 
 // Создаем криптографически стойкий 6-значный URL-безопасный-код
@@ -42,10 +48,10 @@ func shortenHandler(storage *Storage) http.HandlerFunc {
 			return
 		}
 
-		if req.URL == "" {
-			http.Error(w, "URL is required", http.StatusBadRequest)
+		if !isValidURL(req.URL) {
+			http.Error(w, "Invalid URL scheme (must be http or https)", http.StatusBadRequest)
 			return
-		}
+		}	
 
 		if existingCode, ok := storage.GetByOriginal(req.URL); ok {
 			shortURL := "http://localhost:8080/" + existingCode
