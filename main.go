@@ -7,6 +7,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"os/signal"
+	"syscall"
+	"context"
+	"time"
 )
 
 func main() {
@@ -19,9 +24,26 @@ func main() {
 	// Запускаем сервер на 8080 порт
 	log.Println("Server starting on :8080...")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
+	server := &http.Server{Addr: ":8080", Handler: nil}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeOut(context.Background(), time.Second * 5)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
 	}
+	log.Println("Server exited properly")
 }
 
 func isValidURL(raw string) bool {
