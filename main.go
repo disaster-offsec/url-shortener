@@ -21,10 +21,18 @@ func main() {
 	http.HandleFunc("POST /shorten", shortenHandler(storage))
 	http.HandleFunc("GET /{short}", redirectHandler(storage))
 
-	// Запускаем сервер на 8080 порт
-	log.Println("Server starting on :8080...")
 
-	server := &http.Server{Addr: ":8080", Handler: nil}
+	port := os.Getenv("PORT")
+	if port == "" {port = "8080"}
+
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {baseURL = "htpp://localhost" + port}
+
+
+	// Запускаем сервер на 8080 порт
+	log.Printf("Server starting on: %s:%s", baseURL, port)
+
+	server := &http.Server{Addr: ":" + port, Handler: nil}
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
