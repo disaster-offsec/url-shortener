@@ -49,9 +49,9 @@ func (s *Storage) ExistCode(short string) bool {
 }
 
 // Проверяем на наличие по original_url
-func (s *Storage) ExistURL(original string) bool {
+/* func (s *Storage) ExistURL(original string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	_, ok := s.urlToCode[original]
 	return ok
-}
+}*/
