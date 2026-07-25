@@ -86,12 +86,25 @@ Docker + docker-compose
 ## Структура проекта
 
 ```
-.
-├── main.go          # HTTP-сервер и хэндлеры
-├── storage.go       # In-memory хранилище
-├── Dockerfile       # Многоступенчатая сборка
+url-shortener
+├── cmd
+│   └── server
+│       └── main.go
 ├── docker-compose.yml
+├── Dockerfile
 ├── go.mod
+├── go.sum
+├── internal
+│   ├── config
+│   │   └── config.go
+│   ├── handlers
+│   │   ├── middleware.go
+│   │   ├── redirect.go
+│   │   └── shorten.go
+│   ├── storage
+│   │   └── storage.go
+│   └── utils
+│       └── utils.go
 └── README.md
 ```
 
